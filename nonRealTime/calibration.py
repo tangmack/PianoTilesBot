@@ -11,13 +11,13 @@ from settings import *
 def nothing(x):
     pass
 
-PongCalibration = np.load('PianoCalibration.npz')
+PianoCalibration = np.load('PianoCalibration.npz')
 
-LastHighMid = PongCalibration['HighMid']
-LastL1 = PongCalibration['L1']
-LastL2 = PongCalibration['L2']
-LastL3 = PongCalibration['L3']
-LastL4 = PongCalibration['L4']
+LastHighMid = PianoCalibration['HighMid']
+LastL1 = PianoCalibration['L1']
+LastL2 = PianoCalibration['L2']
+LastL3 = PianoCalibration['L3']
+LastL4 = PianoCalibration['L4']
 
 cv2.namedWindow('Calibration')
 cv2.createTrackbar('HighMid', 'Calibration',LastHighMid,HEIGHT,nothing)
