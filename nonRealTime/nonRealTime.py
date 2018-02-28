@@ -12,9 +12,28 @@ import threading
 ##t0 = time.time()
 #initialize time, just to get into main's scope
 
-def worker(num):
-    print "Worker: ",num
+def worker(num,Lane):
+    time.sleep(.97 / num)
+
+##    time.sleep(.26)
+
+    if Lane == 1:
+##        cv2.circle(frame,(L1,H2), 10, RED, -1)
+        print "tap lane 1"
+
+    elif Lane == 2:
+##        cv2.circle(frame,(L2,H2), 10, RED, -1)
+        print "tap lane 2"
+    elif Lane == 3:
+##        cv2.circle(frame,(L3,H2), 10, RED, -1)
+        print "tap lane 3"
+    elif Lane == 4:
+##        cv2.circle(frame,(L4,H2), 10, RED, -1)
+        print "tap lane 4"
+        
     return
+    
+##    print "Worker: ",num
 
 class TimeMarker():
     def __init__(self):
@@ -48,7 +67,7 @@ class TimeMarker():
 ##                print measure
             currentMeasure = 0.97 / (self.t1 - self.last_time)
 
-            t = threading.Thread(target = worker, args=(self.currentAVG,))
+            t = threading.Thread(target = worker, args=(self.currentAVG,Lane,))
             threads.append(t)
             t.start()
 ##            print currentMeasure
@@ -62,7 +81,7 @@ class TimeMarker():
                 self.circular_queue.append( currentMeasure )
                 self.currentAVG = self.movingAverage(self.circular_queue)
 ##            print self.currentAVG
-                print self.currentAVG
+##                print self.currentAVG
 ##            print( 1.0 / (self.t1 - self.last_time) )
             
             self.LastLane = Lane
@@ -140,7 +159,8 @@ while(cap.isOpened()):
 
         checkHeight(HighMid,timer)
 ##        checkHeight(H3,TimeObject)
-        
+
+        cv2.line(frame,(0,H3),(240,H3),VIOLET,1)
         
 
         cv2.imshow('Frame',frame)
