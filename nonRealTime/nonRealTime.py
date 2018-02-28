@@ -6,9 +6,15 @@ import time
 
 from collections import deque
 
+import threading
+
 ##timeEntry = False
 ##t0 = time.time()
 #initialize time, just to get into main's scope
+
+def worker(num):
+    print "Worker: ",num
+    return
 
 class TimeMarker():
     def __init__(self):
@@ -19,7 +25,7 @@ class TimeMarker():
 
 ##        self.circular_queue = \
 ##        deque(np.repeat(AVG_INIT,AVG_SIZE),maxlen=AVG_SIZE)
-        self.circular_queue = deque(maxlen=AVG_SIZE)
+        self.circular_queue = deque([3.2,3.2,3.2], maxlen=AVG_SIZE)
 
         self.currentAVG = 0
 
@@ -40,9 +46,23 @@ class TimeMarker():
 ##            measure = 1.0 / (self.t1 - self.last_time)
 ##            if measure > 3:
 ##                print measure
-            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
-            self.currentAVG = self.movingAverage(self.circular_queue)
-            print self.currentAVG
+            currentMeasure = 0.97 / (self.t1 - self.last_time)
+
+            t = threading.Thread(target = worker, args=(self.currentAVG,))
+            threads.append(t)
+            t.start()
+##            print currentMeasure
+
+##            print currentMeasure
+##            print self.circular_queue[-1]
+            
+
+            if abs((self.circular_queue[-1] - currentMeasure)) < 1:
+##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
+                self.circular_queue.append( currentMeasure )
+                self.currentAVG = self.movingAverage(self.circular_queue)
+##            print self.currentAVG
+                print self.currentAVG
 ##            print( 1.0 / (self.t1 - self.last_time) )
             
             self.LastLane = Lane
@@ -93,6 +113,8 @@ L1 = PianoCalibration['L1']
 L2 = PianoCalibration['L2']
 L3 = PianoCalibration['L3']
 L4 = PianoCalibration['L4']
+
+threads = []
 
 # Create a VideoCapture object and read from input file
 # If the input is the camera, pass 0 instead of the video file name
