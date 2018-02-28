@@ -4,6 +4,8 @@ from settings import *
 
 import time
 
+from collections import deque
+
 ##timeEntry = False
 ##t0 = time.time()
 #initialize time, just to get into main's scope
@@ -14,16 +16,35 @@ class TimeMarker():
         self.t1 = time.time()
 
         self.LastLane = 0
+
+##        self.circular_queue = \
+##        deque(np.repeat(AVG_INIT,AVG_SIZE),maxlen=AVG_SIZE)
+        self.circular_queue = deque(maxlen=AVG_SIZE)
+
+        self.currentAVG = 0
+
+
+    def movingAverage(self,values):
+        weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
+        smas = np.convolve(values,weights,'valid')
+        return smas[0]
         
     def markTime(self,Lane):
     ##    if timeEntryBool == True:
         if(Lane != self.LastLane):
             self.t1 = time.time()
-            #1.329
+            #1.329 inches on calipers
 ##            print "self.t1 ",self.t1, ( 1.0 / (self.t1 - self.last_time) )
 ##            print self.LastLane
 ##            print(self.t1 - self.last_time)
-            print( 1.0 / (self.t1 - self.last_time) )
+##            measure = 1.0 / (self.t1 - self.last_time)
+##            if measure > 3:
+##                print measure
+            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
+            self.currentAVG = self.movingAverage(self.circular_queue)
+            print self.currentAVG
+##            print( 1.0 / (self.t1 - self.last_time) )
+            
             self.LastLane = Lane
             self.last_time = time.time()
 ##        else:
@@ -38,24 +59,28 @@ def checkHeight(H,TimeObject):
     else:
         TimeObject.markTime(1)
         cv2.circle(frame,(L1,H), 5, RED, -1)
+        return
         
     if frame[H, L2, 0] > 150:
         cv2.circle(frame,(L2,H), 5, AQUA, -1)
     else:
         TimeObject.markTime(2)
         cv2.circle(frame,(L2,H), 5, RED, -1)
+        return
         
     if frame[H, L3, 0] > 150:
         cv2.circle(frame,(L3,H), 5, AQUA, -1)
     else:
         TimeObject.markTime(3)
         cv2.circle(frame,(L3,H), 5, RED, -1)
+        return
         
     if frame[H, L4, 0] > 150:
         cv2.circle(frame,(L4,H), 5, AQUA, -1)
     else:
         TimeObject.markTime(4)
         cv2.circle(frame,(L4,H), 5, RED, -1)
+        return
 
 
 PianoCalibration = np.load('PianoCalibration.npz')
@@ -68,14 +93,6 @@ L1 = PianoCalibration['L1']
 L2 = PianoCalibration['L2']
 L3 = PianoCalibration['L3']
 L4 = PianoCalibration['L4']
-
-print L1
-print L2
-print L3
-print L4
-
-print HighMid
-
 
 # Create a VideoCapture object and read from input file
 # If the input is the camera, pass 0 instead of the video file name
@@ -101,6 +118,7 @@ while(cap.isOpened()):
 
         checkHeight(HighMid,timer)
 ##        checkHeight(H3,TimeObject)
+        
         
 
         cv2.imshow('Frame',frame)
