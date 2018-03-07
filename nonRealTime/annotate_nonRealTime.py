@@ -48,6 +48,8 @@ class TimeMarker():
         self.time_sleep_3 = 10.0
         self.time_sleep_4 = 10.0
 
+        self.doubleFlag = False
+
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
         smas = np.convolve(values,weights,'valid')
@@ -55,11 +57,16 @@ class TimeMarker():
         
     def markTime(self,Lane):
     ##    if timeEntryBool == True:
+        self.t1 = time.time()
+        self.currentMeasure = 0.97 / (self.t1 - self.last_time)
+##        print currentMeasure
         if(Lane != self.LastLane):
-            self.t1 = time.time()
+
+            ######################### self.t1 reset is important!
+##            self.t1 = time.time()
             #1.329 inches on calipers
 
-            currentMeasure = 0.97 / (self.t1 - self.last_time)
+##            currentMeasure = 0.97 / (self.t1 - self.last_time)
 
 ##            t = threading.Thread(target = worker, args=(self.currentAVG,Lane,))
 ##            threads.append(t)
@@ -68,28 +75,28 @@ class TimeMarker():
             if Lane == 1:
 ##        cv2.circle(frame,(L1,H2), 10, RED, -1)
 ##                print "tap lane 1"
-                self.time_sleep_1 = time.time() + .97 / self.currentAVG
+                self.time_sleep_1 = time.time() + 2.7 / self.currentAVG
 
             elif Lane == 2:
 ##        cv2.circle(frame,(L2,H2), 10, RED, -1)
 ##                print "tap lane 2"
-                self.time_sleep_2 = time.time() + .97 / self.currentAVG
+                self.time_sleep_2 = time.time() + 2.7 / self.currentAVG
             elif Lane == 3:
 ##        cv2.circle(frame,(L3,H2), 10, RED, -1)
 ##                print "tap lane 3"
-                self.time_sleep_3 = time.time() + .97 / self.currentAVG
+                self.time_sleep_3 = time.time() + 2.7 / self.currentAVG
             elif Lane == 4:
 ##        cv2.circle(frame,(L4,H2), 10, RED, -1)
 ##                print "tap lane 4"
-                self.time_sleep_4 = time.time() + .97 / self.currentAVG
+                self.time_sleep_4 = time.time() + 2.7 / self.currentAVG
 
             
 
             
 
-            if abs((self.circular_queue[-1] - currentMeasure)) < 1:
+            if abs((self.circular_queue[-1] - self.currentMeasure)) < 1:
 ##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
-                self.circular_queue.append( currentMeasure )
+                self.circular_queue.append( self.currentMeasure )
                 self.currentAVG = self.movingAverage(self.circular_queue)
 ##            print self.currentAVG
 ##                print self.currentAVG
@@ -97,22 +104,41 @@ class TimeMarker():
             
             self.LastLane = Lane
             self.last_time = time.time()
-##        else:
-##            t0 = time.time()
-##            timeEntryBool = True
+
+##        elif (currentMeasure < self.currentAVG) and (self.doubleFlag == False):
+##            doubleFlag = True
+####            print "double tile detected"
+##            print time.time()
+##            if Lane == 1:
+####        cv2.circle(frame,(L1,H2), 10, RED, -1)
+####                print "tap lane 1"
+##                self.time_sleep_1 = time.time() + .97 / self.currentAVG
+##
+##            elif Lane == 2:
+####        cv2.circle(frame,(L2,H2), 10, RED, -1)
+####                print "tap lane 2"
+##                self.time_sleep_2 = time.time() + .97 / self.currentAVG
+##            elif Lane == 3:
+####        cv2.circle(frame,(L3,H2), 10, RED, -1)
+####                print "tap lane 3"
+##                self.time_sleep_3 = time.time() + .97 / self.currentAVG
+##            elif Lane == 4:
+####        cv2.circle(frame,(L4,H2), 10, RED, -1)
+####                print "tap lane 4"
+##                self.time_sleep_4 = time.time() + .97 / self.currentAVG
 
     def respondWaitTimes(self):
         if time.time() >= self.time_sleep_1:
-            cv2.circle(frame,(L1,H3), 10, GREEN, -1)
+            cv2.circle(frame,(L1,H1), 10, GREEN, -1)
             self.time_sleep_1 = time.time() + 10.0
         elif time.time() >= self.time_sleep_2:
-            cv2.circle(frame,(L2,H3), 10, GREEN, -1)
+            cv2.circle(frame,(L2,H1), 10, GREEN, -1)
             self.time_sleep_2 = time.time() + 10.0
         elif time.time() >= self.time_sleep_3:
-            cv2.circle(frame,(L3,H3), 10, GREEN, -1)
+            cv2.circle(frame,(L3,H1), 10, GREEN, -1)
             self.time_sleep_3 = time.time() + 10.0
         elif time.time() >= self.time_sleep_4:
-            cv2.circle(frame,(L4,H3), 10, GREEN, -1)
+            cv2.circle(frame,(L4,H1), 10, GREEN, -1)
             self.time_sleep_4 = time.time() + 10.0
             #set to high number so we don't trigger again
             
@@ -192,7 +218,7 @@ while(cap.isOpened()):
 ##        checkHeight(H3,TimeObject)
         timer.respondWaitTimes()
 
-        cv2.line(frame,(0,H3),(240,H3),VIOLET,1)
+        cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
 
         out.write(frame)
 ##        video.write(frame)
