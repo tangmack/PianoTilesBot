@@ -158,7 +158,7 @@ class TimeMarker():
 ##        deque(np.repeat(AVG_INIT,AVG_SIZE),maxlen=AVG_SIZE)
         self.circular_queue = deque([3.2,3.2,3.2], maxlen=AVG_SIZE)
 
-        self.currentAVG = 0
+        self.currentAVG = 3.2
 
 ##        self.doubleTap = np.zeros((5,), dtype=int)
 
@@ -307,11 +307,15 @@ while(cap.isOpened()):
 
         black_lane_hm = timer.checkHeight(HighMid)
 
+##        print "black lane hm ",black_lane_hm
+
 ##        if(black_lane == 0): #todo: find good way to deal with this
 ##            print ("error, no black lane found")
 
         if( timer.markTime( black_lane_hm ) == False ):
             #double or triple possibility, check h3 AND HighMid
+
+##            print "double or triple possibility"
 
             # move H3 down 10 pixels and check it
             black_lane_h3 = timer.checkHeight(H3 + 10)
@@ -324,6 +328,16 @@ while(cap.isOpened()):
                 elif(black_lane_h3 == 1): timer.try_tap(black_lane_hm,counter1)
 ##                elif(black_
 ##                print""
+
+                black_lane_h2 = timer.checkHeight(H2 + 10)
+
+                if( (black_lane_h2 == black_lane_hm) and (black_lane_h2 == black_lane_h3) ):
+                    print "triple detected in lane ",black_lane_h2
+##
+##            if (black_lane_h2 == black_lane_hm):
+##                print "triple detected in lane ",black_lane_h2
+
+        
                 
 ##        timer.markTime( timer.checkHeight(HighMid) )
         # and don't pass in timer anymore
