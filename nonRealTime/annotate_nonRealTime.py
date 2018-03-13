@@ -48,7 +48,7 @@ class TimeMarker():
         self.time_sleep_3 = 10.0
         self.time_sleep_4 = 10.0
 
-        self.doubleFlag = False
+##        self.doubleFlag = False
 
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
@@ -72,23 +72,25 @@ class TimeMarker():
 ##            threads.append(t)
 ##            t.start()
 
+            mult = 2.7
+
             if Lane == 1:
 ##        cv2.circle(frame,(L1,H2), 10, RED, -1)
 ##                print "tap lane 1"
-                self.time_sleep_1 = time.time() + 2.7 / self.currentAVG
+                self.time_sleep_1 = time.time() + mult * (0.97 / self.currentAVG)
 
             elif Lane == 2:
 ##        cv2.circle(frame,(L2,H2), 10, RED, -1)
 ##                print "tap lane 2"
-                self.time_sleep_2 = time.time() + 2.7 / self.currentAVG
+                self.time_sleep_2 = time.time() + mult * (0.97 / self.currentAVG)
             elif Lane == 3:
 ##        cv2.circle(frame,(L3,H2), 10, RED, -1)
 ##                print "tap lane 3"
-                self.time_sleep_3 = time.time() + 2.7 / self.currentAVG
+                self.time_sleep_3 = time.time() + mult * (0.97 / self.currentAVG)
             elif Lane == 4:
 ##        cv2.circle(frame,(L4,H2), 10, RED, -1)
 ##                print "tap lane 4"
-                self.time_sleep_4 = time.time() + 2.7 / self.currentAVG
+                self.time_sleep_4 = time.time() + mult * (0.97 / self.currentAVG)
 
             
 

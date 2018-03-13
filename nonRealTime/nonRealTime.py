@@ -12,24 +12,67 @@ import threading
 ##t0 = time.time()
 #initialize time, just to get into main's scope
 
+import RPi.GPIO as GPIO
+
+LedPin = 11    # pin11
+LedPin2 = 12
+
+LedPin3 = 13
+LedPin4 = 15
+
+def setup():
+  GPIO.setmode(GPIO.BOARD)       # Numbers GPIOs by physical location
+  GPIO.setup(LedPin, GPIO.OUT)   # Set LedPin's mode is output
+  GPIO.output(LedPin, GPIO.HIGH) # Set LedPin high(+3.3V) to turn on led
+
+  GPIO.setup(LedPin2, GPIO.OUT)   # Set LedPin's mode is output
+  GPIO.output(LedPin2, GPIO.HIGH) # Set LedPin high(+3.3V) to turn on led
+
+  GPIO.setup(LedPin3, GPIO.OUT)   # Set LedPin's mode is output
+  GPIO.output(LedPin3, GPIO.HIGH) # Set LedPin high(+3.3V) to turn on led
+
+  GPIO.setup(LedPin4, GPIO.OUT)   # Set LedPin's mode is output
+  GPIO.output(LedPin4, GPIO.HIGH) # Set LedPin high(+3.3V) to turn on led
+
 def worker(num,Lane):
-    time.sleep(.97 / num)
+    time.sleep(3*(.97 / num))
 
 ##    time.sleep(.26)
 
     if Lane == 1:
 ##        cv2.circle(frame,(L1,H2), 10, RED, -1)
         print "tap lane 1"
+        GPIO.output(LedPin, GPIO.HIGH)  # led on
+        time.sleep(0.01)
+
+        GPIO.output(LedPin, GPIO.LOW)  # led on
+        time.sleep(0.01)
 
     elif Lane == 2:
 ##        cv2.circle(frame,(L2,H2), 10, RED, -1)
         print "tap lane 2"
+        GPIO.output(LedPin2, GPIO.HIGH)  # led on
+        time.sleep(0.01)
+
+        GPIO.output(LedPin2, GPIO.LOW)  # led on
+        time.sleep(0.01)
     elif Lane == 3:
 ##        cv2.circle(frame,(L3,H2), 10, RED, -1)
         print "tap lane 3"
+        GPIO.output(LedPin3, GPIO.HIGH)  # led on
+        time.sleep(0.01)
+
+        GPIO.output(LedPin3, GPIO.LOW)  # led on
+        time.sleep(0.01)
+        
     elif Lane == 4:
 ##        cv2.circle(frame,(L4,H2), 10, RED, -1)
         print "tap lane 4"
+        GPIO.output(LedPin4, GPIO.HIGH)  # led on
+        time.sleep(0.01)
+
+        GPIO.output(LedPin4, GPIO.LOW)  # led on
+        time.sleep(0.01)
         
     return
     
@@ -59,38 +102,21 @@ class TimeMarker():
         if(Lane != self.LastLane):
             self.t1 = time.time()
             #1.329 inches on calipers
-##            print "self.t1 ",self.t1, ( 1.0 / (self.t1 - self.last_time) )
-##            print self.LastLane
-##            print(self.t1 - self.last_time)
-##            measure = 1.0 / (self.t1 - self.last_time)
-##            if measure > 3:
-##                print measure
+
             currentMeasure = 0.97 / (self.t1 - self.last_time)
 
             t = threading.Thread(target = worker, args=(self.currentAVG,Lane,))
             threads.append(t)
             t.start()
-##            print currentMeasure
-
-##            print currentMeasure
-##            print self.circular_queue[-1]
-            
 
             if abs((self.circular_queue[-1] - currentMeasure)) < 1:
 ##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
                 self.circular_queue.append( currentMeasure )
                 self.currentAVG = self.movingAverage(self.circular_queue)
-##            print self.currentAVG
-##                print self.currentAVG
-##            print( 1.0 / (self.t1 - self.last_time) )
             
             self.LastLane = Lane
             self.last_time = time.time()
-##        else:
-##            t0 = time.time()
-##            timeEntryBool = True
-    
-    
+
 
 def checkHeight(H,TimeObject):
     if frame[H, L1, 0] > 150:
@@ -121,6 +147,7 @@ def checkHeight(H,TimeObject):
         cv2.circle(frame,(L4,H), 5, RED, -1)
         return
 
+setup() # setup GPIO's
 
 PianoCalibration = np.load('PianoCalibration.npz')
 
@@ -160,7 +187,7 @@ while(cap.isOpened()):
         checkHeight(HighMid,timer)
 ##        checkHeight(H3,TimeObject)
 
-        cv2.line(frame,(0,H3),(240,H3),VIOLET,1)
+        cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
         
 
         cv2.imshow('Frame',frame)
@@ -173,7 +200,11 @@ while(cap.isOpened()):
         break
  
 
-
+GPIO.output(LedPin, GPIO.LOW)   # led off
+GPIO.output(LedPin2, GPIO.LOW)   # led off
+GPIO.output(LedPin3, GPIO.LOW)   # led off
+GPIO.output(LedPin4, GPIO.LOW)   # led off
+GPIO.cleanup()                  # Release resource
  
 # When everything done, release the video capture object
 cap.release()
