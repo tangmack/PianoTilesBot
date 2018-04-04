@@ -2,10 +2,9 @@ import RPi.GPIO as GPIO
 import time
 
 LedPin = 11    # pin11
-LedPin2 = 12
-
-LedPin3 = 13
-LedPin4 = 15
+LedPin2 = 12    # pin11
+LedPin3 = 15    # pin11
+LedPin4 = 13    # pin11
 
 def setup():
   GPIO.setmode(GPIO.BOARD)       # Numbers GPIOs by physical location
@@ -21,21 +20,13 @@ def setup():
   GPIO.setup(LedPin4, GPIO.OUT)   # Set LedPin's mode is output
   GPIO.output(LedPin4, GPIO.LOW) # Set LedPin high(+3.3V) to turn on led
 
-def blink():
-  while True:
-    GPIO.output(LedPin, GPIO.HIGH)  # led on
-    GPIO.output(LedPin2, GPIO.LOW)  # led on
-    GPIO.output(LedPin3, GPIO.LOW)  # led on
-    GPIO.output(LedPin4, GPIO.LOW)  # led on
-    time.sleep(.1)
-    
-    GPIO.output(LedPin, GPIO.LOW) # led off
-    GPIO.output(LedPin2, GPIO.HIGH) # led off
-    GPIO.output(LedPin3, GPIO.HIGH)  # led on
-    GPIO.output(LedPin4, GPIO.HIGH)  # led on
-    time.sleep(.1)
-
-    time.sleep(0.5)
+def blink(pinNumber):
+##  while True:
+    for i in range(0,50):
+        GPIO.output(pinNumber, GPIO.HIGH)  # led on
+        time.sleep(.05)
+        GPIO.output(pinNumber, GPIO.LOW) # led off
+        time.sleep(.05)
 
 def destroy():
   GPIO.output(LedPin, GPIO.LOW)   # led off
@@ -47,8 +38,12 @@ def destroy():
 if __name__ == '__main__':     # Program start from here
   setup()
   try:
-##    time.sleep(1)
-    blink()
-##    time.sleep(1)
+    blink(LedPin)
+    blink(LedPin2)
+    blink(LedPin3)
+    blink(LedPin4)
   except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.
     destroy()
+    
+  finally:
+    GPIO.cleanup()
