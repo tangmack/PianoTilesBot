@@ -1,5 +1,8 @@
 #todo: speed, code should only have if(lane) once in loop
 
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+
 import cv2
 import numpy as np
 from settings import *
@@ -17,15 +20,20 @@ import logging
 
 import RPi.GPIO as GPIO
 
+import sys
+
+
+
 delay_time = .02
 
 LedPin = 11    # pin11
 LedPin2 = 12
 
-LedPin3 = 13
-LedPin4 = 15
+LedPin3 = 15
+LedPin4 = 13
 
 def setup():
+    GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BOARD)       # Numbers GPIOs by physical location
     GPIO.setup(LedPin, GPIO.OUT)   # Set LedPin's mode is output
     GPIO.output(LedPin, GPIO.LOW) # Set LedPin high(+3.3V) to turn on led
@@ -41,6 +49,46 @@ def setup():
 
 def worker(num,Lane):
     time.sleep(3*(0.97 / num))
+
+##    time.sleep(.26)
+
+    if Lane == 1:
+##        cv2.circle(frame,(L1,H2), 10, RED, -1)
+        print "tap lane 1"
+        GPIO.output(LedPin, GPIO.HIGH)  # led on
+        time.sleep(delay_time)
+
+        GPIO.output(LedPin, GPIO.LOW)  # led on
+        time.sleep(delay_time)
+
+    elif Lane == 2:
+##        cv2.circle(frame,(L2,H2), 10, RED, -1)
+        print "tap lane 2"
+        GPIO.output(LedPin2, GPIO.HIGH)  # led on
+        time.sleep(delay_time)
+
+        GPIO.output(LedPin2, GPIO.LOW)  # led on
+        time.sleep(delay_time)
+    elif Lane == 3:
+##        cv2.circle(frame,(L3,H2), 10, RED, -1)
+        print "tap lane 3"
+        GPIO.output(LedPin3, GPIO.HIGH)  # led on
+        time.sleep(delay_time)
+
+        GPIO.output(LedPin3, GPIO.LOW)  # led on
+        time.sleep(delay_time)
+        
+    elif Lane == 4:
+##        cv2.circle(frame,(L4,H2), 10, RED, -1)
+        print "tap lane 4"
+        GPIO.output(LedPin4, GPIO.HIGH)  # led on
+        time.sleep(delay_time)
+
+        GPIO.output(LedPin4, GPIO.LOW)  # led on
+        time.sleep(delay_time)
+
+def worker_simple(num,Lane):
+    time.sleep(num)
 
 ##    time.sleep(.26)
 
@@ -262,6 +310,12 @@ class TimeMarker():
         else:
             pass
 
+    def simple_tap(self,BlackLane,number): 
+        t = threading.Thread\
+                (target = worker_simple, args=(number,BlackLane,))
+        threads.append(t)
+        t.start()
+
         
 
 setup() # setup GPIO's
@@ -284,7 +338,7 @@ threads = []
 
 # Create a VideoCapture object and read from input file
 # If the input is the camera, pass 0 instead of the video file name
-cap = cv2.VideoCapture('my_video.h264')
+##cap = cv2.VideoCapture('my_video.h264')
 
 timer = TimeMarker()
 
@@ -300,70 +354,106 @@ triplecounter3 = Counter()
 triplecounter4 = Counter()
  
 # Check if camera opened successfully
-if (cap.isOpened()== False):
-    print("Error opening video stream or file")
+##if (cap.isOpened()== False):
+##    print("Error opening video stream or file")
 
+###################### camera setup
+camera = PiCamera()
+camera.resolution = (WIDTH, HEIGHT)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=(WIDTH, HEIGHT))
 
-# Read until video is completed
-while(cap.isOpened()):
-  
-    ret, frame = cap.read()
-    if ret == True:
+# allow the camera to warmup
+time.sleep(0.1)
+#####################
 
-##        print counter1.get_val()
+for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    frame = img.array
 
-        black_lane_hm = timer.checkHeight(HighMid)
+    black_lane_h2 = timer.checkHeight(H2) #int (1,2,3 or 4) storing black lane number
+    black_lane_h3 = timer.checkHeight(H3)
+##    black_lane_hm = timer.checkHeight(HighMid)
 
-##        print "black lane hm ",black_lane_hm
+##    timer.try_tap(black_lane_hm,counter1)
+##    timer.try_tap(black_lane_h2,counter2)
+    
+    if(black_lane_h2 == 1): timer.simple_tap(black_lane_h2,0)
+    elif(black_lane_h2 == 2): timer.simple_tap(black_lane_h2,0)
+    elif(black_lane_h2 == 3): timer.simple_tap(black_lane_h2,0)
+    elif(black_lane_h2 == 4): timer.simple_tap(black_lane_h2,0)
 
-##        if(black_lane == 0): #todo: find good way to deal with this
-##            print ("error, no black lane found")
+    if(black_lane_h3 == 1): timer.simple_tap(black_lane_h3,.33) #tried .303, then bumped up to .33
+    elif(black_lane_h3 == 2): timer.simple_tap(black_lane_h3,.33)
+    elif(black_lane_h3 == 3): timer.simple_tap(black_lane_h3,.33)
+    elif(black_lane_h3 == 4): timer.simple_tap(black_lane_h3,.33)
 
-        if( timer.markTime( black_lane_hm ) == False ):
-            #double or triple possibility, check h3 AND HighMid
+    
 
-##            print "double or triple possibility"
-
-            # move H3 down 10 pixels and check it
-            black_lane_h3 = timer.checkHeight(H3 + 10)
+    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
             
-            if( black_lane_h3 == black_lane_hm ):
-##                if(black_lane_h3 == 1): timer.try_tap(black_lane_hm, counter1)
-                if(black_lane_h3 == 1): timer.try_tap(black_lane_hm,counter1)
-                elif(black_lane_h3 == 2): timer.try_tap(black_lane_hm,counter2)
-                elif(black_lane_h3 == 3): timer.try_tap(black_lane_hm,counter3)
-                elif(black_lane_h3 == 4): timer.try_tap(black_lane_hm,counter4)
-                
-##                elif(black_
-##                print""
 
-                black_lane_h2 = timer.checkHeight(H2 + 10)
+    cv2.imshow('Frame',frame)
 
-                if( (black_lane_h2 == black_lane_hm) and (black_lane_h2 == black_lane_h3) ):
-##                    print "triple detected in lane ",black_lane_h2
-                    if(black_lane_h2 == 1): timer.try_tap(black_lane_hm,triplecounter1)
-                    elif(black_lane_h2 == 2): timer.try_tap(black_lane_hm,triplecounter2)
-                    elif(black_lane_h2 == 3): timer.try_tap(black_lane_hm,triplecounter3)
-                    elif(black_lane_h2 == 4): timer.try_tap(black_lane_hm,triplecounter4)##
-##            if (black_lane_h2 == black_lane_hm):
-##                print "triple detected in lane ",black_lane_h2
+    # clear the stream in preparation for the next frame
+    rawCapture.truncate(0)
 
-        
-                
-##        timer.markTime( timer.checkHeight(HighMid) )
-        # and don't pass in timer anymore
-        
-        cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
-        
-
-        cv2.imshow('Frame',frame)
-
-        # Press Q on keyboard to  exit
-        if cv2.waitKey(25) & 0xFF == ord('q'):
-            break
-
-    else:
+    if cv2.waitKey(25) & 0xFF == ord('q'):
         break
+
+    break #only do this loop once
+
+##time.sleep(5)
+##sys.exit() #for now add a "breakpoint" here
+    
+
+  
+for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    frame = img.array
+
+    black_lane_hm = timer.checkHeight(HighMid) #int (1,2,3 or 4) storing black lane number
+
+    if( timer.markTime( black_lane_hm ) == False ):
+    #double or triple possibility, check h3 AND HighMid
+
+        # move H3 down 10 pixels and check it
+        black_lane_h3 = timer.checkHeight(H3 + 10)
+                
+        if( black_lane_h3 == black_lane_hm ):
+            if(black_lane_h3 == 1): timer.try_tap(black_lane_hm,counter1)
+            elif(black_lane_h3 == 2): timer.try_tap(black_lane_hm,counter2)
+            elif(black_lane_h3 == 3): timer.try_tap(black_lane_hm,counter3)
+            elif(black_lane_h3 == 4): timer.try_tap(black_lane_hm,counter4)
+
+            black_lane_h2 = timer.checkHeight(H2 + 10)
+
+            if( (black_lane_h2 == black_lane_hm) and (black_lane_h2 == black_lane_h3) ):
+    ##                    print "triple detected in lane ",black_lane_h2
+                if(black_lane_h2 == 1): timer.try_tap(black_lane_hm,triplecounter1)
+                elif(black_lane_h2 == 2): timer.try_tap(black_lane_hm,triplecounter2)
+                elif(black_lane_h2 == 3): timer.try_tap(black_lane_hm,triplecounter3)
+                elif(black_lane_h2 == 4): timer.try_tap(black_lane_hm,triplecounter4)##
+    ##            if (black_lane_h2 == black_lane_hm):
+    ##                print "triple detected in lane ",black_lane_h2
+
+            
+                    
+    ##        timer.markTime( timer.checkHeight(HighMid) )
+            # and don't pass in timer anymore
+            
+    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
+            
+
+    cv2.imshow('Frame',frame)
+
+    # clear the stream in preparation for the next frame
+    rawCapture.truncate(0)
+
+            # Press Q on keyboard to  exit
+    if cv2.waitKey(25) & 0xFF == ord('q'):
+        break
+
+
+
  
 
 GPIO.output(LedPin, GPIO.LOW)   # led off
