@@ -24,9 +24,9 @@ def blink(pinNumber):
 ##  while True:
     for i in range(0,50):
         GPIO.output(pinNumber, GPIO.HIGH)  # led on
-        time.sleep(.05)
+        time.sleep(.019)
         GPIO.output(pinNumber, GPIO.LOW) # led off
-        time.sleep(.05)
+        time.sleep(.019)
 
 def destroy():
   GPIO.output(LedPin, GPIO.LOW)   # led off

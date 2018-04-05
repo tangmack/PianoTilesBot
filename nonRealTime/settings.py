@@ -17,4 +17,4 @@ PINK = (255, 0, 255)
 DGREEN = (51, 153, 0)
 
 ##AVG_INIT = 3.3
-AVG_SIZE = 7
+AVG_SIZE = 3

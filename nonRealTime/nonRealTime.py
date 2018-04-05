@@ -40,6 +40,7 @@ def setup():
     GPIO.output(LedPin4, GPIO.LOW) # Set LedPin high(+3.3V) to turn on led
 
 def worker(num,Lane):
+##    print "normal worker",num, Lane
     time.sleep(3*(0.97 / num))
 
 ##    time.sleep(.26)
@@ -81,6 +82,7 @@ def worker(num,Lane):
 
 
 def doubleTapWorker(num,Lane,c):
+##    print "double tap worker",num,Lane
     time.sleep(3*(0.97 / num))
 
 ##    print Lane
@@ -183,12 +185,16 @@ class TimeMarker():
 
             currentMeasure = .97 / (self.t1 - self.last_time)
 
+            if currentMeasure <= 2.9:
+                currentMeasure = 2.9
+
             t = threading.Thread\
                 (target = worker, args=(self.currentAVG,BlackLane,))
             threads.append(t)
             t.start()
 
             if abs((self.circular_queue[-1] - currentMeasure)) < 1:
+##                print "currentMeasure added to avg: ",currentMeasure
 ##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
                 self.circular_queue.append( currentMeasure )
                 self.currentAVG = self.movingAverage(self.circular_queue)
@@ -303,12 +309,14 @@ triplecounter4 = Counter()
 if (cap.isOpened()== False):
     print("Error opening video stream or file")
 
-
 # Read until video is completed
 while(cap.isOpened()):
   
     ret, frame = cap.read()
     if ret == True:
+
+##        print "currentAVG is ",timer.currentAVG
+
 
 ##        print counter1.get_val()
 
@@ -334,8 +342,6 @@ while(cap.isOpened()):
                 elif(black_lane_h3 == 3): timer.try_tap(black_lane_hm,counter3)
                 elif(black_lane_h3 == 4): timer.try_tap(black_lane_hm,counter4)
                 
-##                elif(black_
-##                print""
 
                 black_lane_h2 = timer.checkHeight(H2 + 10)
 
@@ -344,9 +350,7 @@ while(cap.isOpened()):
                     if(black_lane_h2 == 1): timer.try_tap(black_lane_hm,triplecounter1)
                     elif(black_lane_h2 == 2): timer.try_tap(black_lane_hm,triplecounter2)
                     elif(black_lane_h2 == 3): timer.try_tap(black_lane_hm,triplecounter3)
-                    elif(black_lane_h2 == 4): timer.try_tap(black_lane_hm,triplecounter4)##
-##            if (black_lane_h2 == black_lane_hm):
-##                print "triple detected in lane ",black_lane_h2
+                    elif(black_lane_h2 == 4): timer.try_tap(black_lane_hm,triplecounter4)
 
         
                 

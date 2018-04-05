@@ -24,7 +24,7 @@ import sys
 
 
 
-delay_time = .02
+delay_time = .022
 
 LedPin = 11    # pin11
 LedPin2 = 12
@@ -48,6 +48,7 @@ def setup():
     GPIO.output(LedPin4, GPIO.LOW) # Set LedPin high(+3.3V) to turn on led
 
 def worker(num,Lane):
+    print num
     time.sleep(3*(0.97 / num))
 
 ##    time.sleep(.26)
@@ -206,9 +207,9 @@ class TimeMarker():
 
 ##        self.circular_queue = \
 ##        deque(np.repeat(AVG_INIT,AVG_SIZE),maxlen=AVG_SIZE)
-        self.circular_queue = deque([3.2,3.2,3.2], maxlen=AVG_SIZE)
+        self.circular_queue = deque([3.1,3.1,3.1], maxlen=AVG_SIZE)
 
-        self.currentAVG = 3.2
+        self.currentAVG = 3.1
 
 ##        self.doubleTap = np.zeros((5,), dtype=int)
 
@@ -238,6 +239,7 @@ class TimeMarker():
 
             if abs((self.circular_queue[-1] - currentMeasure)) < 1:
 ##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
+##                print currentMeasure
                 self.circular_queue.append( currentMeasure )
                 self.currentAVG = self.movingAverage(self.circular_queue)
             
@@ -364,7 +366,7 @@ camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(WIDTH, HEIGHT))
 
 # allow the camera to warmup
-time.sleep(0.1)
+time.sleep(0.2)
 #####################
 
 for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
