@@ -22,9 +22,9 @@ import RPi.GPIO as GPIO
 
 import sys
 
+screen_length = 0.97
 
-
-delay_time = .022
+delay_time = .03
 
 LedPin = 11    # pin11
 LedPin2 = 12
@@ -49,7 +49,7 @@ def setup():
 
 def worker(num,Lane):
     print num
-    time.sleep(3*(0.97 / num))
+    time.sleep(3*(screen_length / num))
 
 ##    time.sleep(.26)
 
@@ -130,7 +130,7 @@ def worker_simple(num,Lane):
 
 
 def doubleTapWorker(num,Lane,c):
-    time.sleep(3*(0.97 / num))
+    time.sleep(3*(screen_length / num))
 
 ##    print Lane
 
@@ -207,9 +207,9 @@ class TimeMarker():
 
 ##        self.circular_queue = \
 ##        deque(np.repeat(AVG_INIT,AVG_SIZE),maxlen=AVG_SIZE)
-        self.circular_queue = deque([3.1,3.1,3.1], maxlen=AVG_SIZE)
+        self.circular_queue = deque([3.4,3.4,3.4], maxlen=AVG_SIZE)
 
-        self.currentAVG = 3.1
+        self.currentAVG = 3.4
 
 ##        self.doubleTap = np.zeros((5,), dtype=int)
 
@@ -230,7 +230,10 @@ class TimeMarker():
             self.t1 = time.time()
             #1.329 inches on calipers
 
-            currentMeasure = .97 / (self.t1 - self.last_time)
+            currentMeasure = screen_length / (self.t1 - self.last_time)
+
+            if currentMeasure <= 3.1:
+                currentMeasure = 3.1
 
             t = threading.Thread\
                 (target = worker, args=(self.currentAVG,BlackLane,))
@@ -366,10 +369,12 @@ camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(WIDTH, HEIGHT))
 
 # allow the camera to warmup
-time.sleep(0.2)
+time.sleep(0.1)
 #####################
 
 for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    print "currentAVG is :",timer.currentAVG
+
     frame = img.array
 
     black_lane_h2 = timer.checkHeight(H2) #int (1,2,3 or 4) storing black lane number
@@ -391,10 +396,10 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
 
     
 
-    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
+##    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
             
 
-    cv2.imshow('Frame',frame)
+##    cv2.imshow('Frame',frame)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
@@ -442,10 +447,10 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
     ##        timer.markTime( timer.checkHeight(HighMid) )
             # and don't pass in timer anymore
             
-    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
+##    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
             
 
-    cv2.imshow('Frame',frame)
+##    cv2.imshow('Frame',frame)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
