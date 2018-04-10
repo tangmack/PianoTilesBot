@@ -22,6 +22,8 @@ import RPi.GPIO as GPIO
 
 import sys
 
+lower_time_factor = 0.93
+
 screen_length = 0.97
 
 delay_time = .03
@@ -89,7 +91,7 @@ def worker(num,Lane):
         time.sleep(delay_time)
 
 def worker_simple(num,Lane):
-    time.sleep(num)
+    time.sleep(num * lower_time_factor)
 
 ##    time.sleep(.26)
 
@@ -130,7 +132,7 @@ def worker_simple(num,Lane):
 
 
 def doubleTapWorker(num,Lane,c):
-    time.sleep(3*(screen_length / num))
+    time.sleep(3*(screen_length / num / lower_time_factor) )
 
 ##    print Lane
 
@@ -207,9 +209,9 @@ class TimeMarker():
 
 ##        self.circular_queue = \
 ##        deque(np.repeat(AVG_INIT,AVG_SIZE),maxlen=AVG_SIZE)
-        self.circular_queue = deque([3.4,3.4,3.4], maxlen=AVG_SIZE)
+        self.circular_queue = deque([3.2,3.2,3.2], maxlen=AVG_SIZE)
 
-        self.currentAVG = 3.4
+        self.currentAVG = 3.2
 
 ##        self.doubleTap = np.zeros((5,), dtype=int)
 
@@ -230,7 +232,7 @@ class TimeMarker():
             self.t1 = time.time()
             #1.329 inches on calipers
 
-            currentMeasure = screen_length / (self.t1 - self.last_time)
+            currentMeasure = screen_length / ((self.t1 - self.last_time)*.95)
 
             if currentMeasure <= 3.1:
                 currentMeasure = 3.1
@@ -373,7 +375,6 @@ time.sleep(0.1)
 #####################
 
 for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-    print "currentAVG is :",timer.currentAVG
 
     frame = img.array
 
@@ -415,6 +416,8 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
 
   
 for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    print "currentAVG is :",timer.currentAVG
+
     frame = img.array
 
     black_lane_hm = timer.checkHeight(HighMid) #int (1,2,3 or 4) storing black lane number
