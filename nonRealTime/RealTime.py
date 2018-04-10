@@ -24,7 +24,7 @@ import sys
 
 lower_time_factor = 0.93
 
-screen_length = 0.97
+##screen_length = 0.97
 
 delay_time = .03
 
@@ -51,7 +51,7 @@ def setup():
 
 def worker(num,Lane):
     print num
-    time.sleep(3*(screen_length / num))
+    time.sleep(3*num)
 
 ##    time.sleep(.26)
 
@@ -132,7 +132,7 @@ def worker_simple(num,Lane):
 
 
 def doubleTapWorker(num,Lane,c):
-    time.sleep(3*(screen_length / num / lower_time_factor) )
+    time.sleep(3* num * lower_time_factor)
 
 ##    print Lane
 
@@ -209,9 +209,9 @@ class TimeMarker():
 
 ##        self.circular_queue = \
 ##        deque(np.repeat(AVG_INIT,AVG_SIZE),maxlen=AVG_SIZE)
-        self.circular_queue = deque([3.2,3.2,3.2], maxlen=AVG_SIZE)
+        self.circular_queue = deque([0.3,0.3,0.3], maxlen=AVG_SIZE)
 
-        self.currentAVG = 3.2
+        self.currentAVG = 0.3
 
 ##        self.doubleTap = np.zeros((5,), dtype=int)
 
@@ -232,17 +232,17 @@ class TimeMarker():
             self.t1 = time.time()
             #1.329 inches on calipers
 
-            currentMeasure = screen_length / ((self.t1 - self.last_time)*.95)
+            currentMeasure = (self.t1 - self.last_time)
 
-            if currentMeasure <= 3.1:
-                currentMeasure = 3.1
+            if currentMeasure >= .31:
+                currentMeasure = .31
 
             t = threading.Thread\
                 (target = worker, args=(self.currentAVG,BlackLane,))
             threads.append(t)
             t.start()
 
-            if abs((self.circular_queue[-1] - currentMeasure)) < 1:
+            if abs((self.circular_queue[-1] - currentMeasure)) < .97:
 ##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
 ##                print currentMeasure
                 self.circular_queue.append( currentMeasure )
