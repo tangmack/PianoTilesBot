@@ -22,11 +22,13 @@ def setup():
 
 def blink(pinNumber):
 ##  while True:
-    for i in range(0,50):
+    for i in range(0,2):
         GPIO.output(pinNumber, GPIO.HIGH)  # led on
-        time.sleep(.019)
+##        time.sleep(.06)
+        time.sleep(.1)
         GPIO.output(pinNumber, GPIO.LOW) # led off
-        time.sleep(.019)
+##        time.sleep(.03)
+        time.sleep(.1) 
 
 def destroy():
   GPIO.output(LedPin, GPIO.LOW)   # led off

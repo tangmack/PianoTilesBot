@@ -226,13 +226,12 @@ class TimeMarker():
 ##        self.second_lowered = False
         
         # need to put a "fake" .01 case at the end to prevent index out of bounds
-        self.tier_arr = np.array([.17,.13,.11,.08,0])
-##        self.tier_arr = np.array([.19,0,0,0,0])
-        self.Lower_arr = np.array([0.80,.70,.65,.60,.60])
+        self.tier_arr = np.array([.17,.14,.11,.08,0])
+        self.Lower_arr = np.array([0.75,.70,.65,.60,.60])
 ##        self.trigger = np.array([False,False])
         self.tier_i = 0
         
-        self.my_lower_time = 0.85
+        self.my_lower_time = 0.83
 
 ##        self.doubleTap = np.zeros((5,), dtype=int)
 
@@ -255,8 +254,6 @@ class TimeMarker():
 
             currentMeasure = (self.t1 - self.last_time)
 
-##            print currentMeasure
-
 ##            if currentMeasure >= .31:
 ##                currentMeasure = .31
                 
@@ -275,7 +272,7 @@ class TimeMarker():
             threads.append(t)
             t.start()
 
-            if abs((self.circular_queue[-1] - currentMeasure)) < .08 and currentMeasure < self.circular_queue[-1]:
+            if abs((self.circular_queue[-1] - currentMeasure)) < .97 and currentMeasure < .31:
 ##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
                 print currentMeasure
                 self.circular_queue.append( currentMeasure )

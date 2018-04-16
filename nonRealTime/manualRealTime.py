@@ -22,6 +22,9 @@ import RPi.GPIO as GPIO
 
 import sys
 
+import pygame
+
+
 ##lower_time_factor = 0.85#this may not be doing anything,
 #move to constructor?
 ##first_lowered = False
@@ -186,6 +189,16 @@ def doubleTapWorker(num,Lane,c):
         time.sleep(delay_time_release)
         c.set_val(0)
 
+##def keyboardListener(number):
+##    pygame.init()
+##
+##    print "hello"
+##    while True:
+##        events = pygame.event.get()
+##        for event in events:
+##            if(event.type == KEYUP) or (event.type == KEYDOWN):
+##                print "key pressed"
+
     
 class Counter(object):
     def __init__(self, start=0):
@@ -226,9 +239,11 @@ class TimeMarker():
 ##        self.second_lowered = False
         
         # need to put a "fake" .01 case at the end to prevent index out of bounds
-        self.tier_arr = np.array([.17,.13,.11,.08,0])
+        self.tier_arr = np.array([.17,.13,.11,.08,.05,.02,.02,.02,0])
 ##        self.tier_arr = np.array([.19,0,0,0,0])
-        self.Lower_arr = np.array([0.80,.70,.65,.60,.60])
+##        self.Lower_arr = np.array([0.80,.70,.65,.60,.55,.50,.45,.40,.35])
+        self.Lower_arr = np.array([0.80,.75,.70,.65,.60,.55,.50,.45,.40])
+
 ##        self.trigger = np.array([False,False])
         self.tier_i = 0
         
@@ -259,12 +274,13 @@ class TimeMarker():
 
 ##            if currentMeasure >= .31:
 ##                currentMeasure = .31
-                
+
+               
             #lower time factor, only do this once.
-            if (self.currentAVG <= self.tier_arr[self.tier_i]):
-                print "lowering time factor to ",self.tier_i
-                self.my_lower_time = self.Lower_arr[self.tier_i]
-                self.tier_i += 1
+##            if cv2.waitKey(25) & 0xFF == ord('a'):
+##                print "lowering time factor to ",self.tier_i
+##                self.my_lower_time = self.Lower_arr[self.tier_i]
+##                self.tier_i += 1
 ##            elif (self.currentAVG <= .16) and (self.second_lowered == False):
 ##                print "lowering time factor to 0.65"
 ##                self.my_lower_time = .70
@@ -373,6 +389,11 @@ L4 = PianoCalibration['L4']
 
 threads = []
 
+##k = threading.Thread\
+##            (target = keyboardListener, args=(1,))
+####            threads.append(a)
+##k.start() # note this can still cause more than one threads named "a"
+
 ##t1 = threading.Thread(target = worker, args=(self.currentAVG,black_lane_hm,))
 ##                threads.append(t)
 
@@ -392,10 +413,16 @@ triplecounter1 = Counter()
 triplecounter2 = Counter()
 triplecounter3 = Counter()
 triplecounter4 = Counter()
+
+
+
+
  
 # Check if camera opened successfully
 ##if (cap.isOpened()== False):
 ##    print("Error opening video stream or file")
+
+dead_frame = np.zeros([0],dtype=np.uint8)
 
 ###################### camera setup
 camera = PiCamera()
@@ -428,6 +455,12 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
     elif(black_lane_h3 == 3): timer.simple_tap(black_lane_h3,.33)
     elif(black_lane_h3 == 4): timer.simple_tap(black_lane_h3,.33)
 
+
+    if cv2.waitKey(25) & 0xFF == ord('a'):
+        print "lowering time factor to ",timer.tier_i
+        timer.my_lower_time = timer.Lower_arr[timer.tier_i]
+        timer.tier_i += 1
+
     
 
 ##    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
@@ -451,6 +484,8 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
 for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 ##    print "currentAVG is :",timer.currentAVG
     frame = img.array
+
+    
 
     black_lane_hm = timer.checkHeight(HighMid) #int (1,2,3 or 4) storing black lane number
 
@@ -487,10 +522,15 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
 ##    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
             
 
-##    cv2.imshow('Frame',frame)
+    cv2.imshow('dead_frame',frame)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
+
+    if cv2.waitKey(25) & 0xFF == ord('a'):
+        print "lowering time factor to ",timer.tier_i
+        timer.my_lower_time = timer.Lower_arr[timer.tier_i]
+        timer.tier_i += 1
 
             # Press Q on keyboard to  exit
     if cv2.waitKey(25) & 0xFF == ord('q'):
