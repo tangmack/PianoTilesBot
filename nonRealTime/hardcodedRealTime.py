@@ -213,6 +213,7 @@ class TimeMarker():
     def __init__(self):
         self.last_time = time.time()
         self.t1 = time.time()
+        self.t0 = time.time()
 
         self.LastLane = 0
 
@@ -232,7 +233,18 @@ class TimeMarker():
 ##        self.trigger = np.array([False,False])
         self.tier_i = 0
         
-        self.my_lower_time = 0.779
+##        self.my_lower_time = 0.779
+        self.my_lower_time = 1
+
+        self.a = 5
+
+##        self.doubleTap = np.zeros((5,), dtype=int)
+
+##    def get_currentAVG():
+##        return self.currentAVG
+##    def set_doubleTap(self,lane,number):
+##        self.doubleTap[lane] = number
+
 
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
@@ -269,19 +281,33 @@ class TimeMarker():
                 (target = worker, args=((self.currentAVG*.833)*self.my_lower_time,BlackLane,))
                 threads.append(t)
                 t.start()
+
+                print "adjusted time used"
             # and currentMeasure < self.circular_queue[-1]
             # abs((self.circular_queue[-1] - currentMeasure)) < .08
-            if abs((self.circular_queue[-1] - currentMeasure)) < .2:
-##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
-##                print currentMeasure
-                if adjust == 0:
-                    print currentMeasure
-                    self.circular_queue.append( currentMeasure )
-                    self.currentAVG = self.movingAverage(self.circular_queue)
-                elif adjust == 1:
-                    print "adjusted, ",currentMeasure / 1.4
-                    self.circular_queue.append( currentMeasure /1.4 )
-                    self.currentAVG = self.movingAverage(self.circular_queue)
+##            .0309338 too slow
+##            .031 too fast
+##            .0395 too fast
+##            .0352169 too fast
+##            .03307535 fast
+##            .032004575
+##            .0314691875
+            if (self.t1 - self.t0) > self.a:
+                
+                self.currentAVG = self.currentAVG - .0309338
+                self.a += 5
+                print "updated avg",self.currentAVG
+                
+            
+##            if abs((self.circular_queue[-1] - currentMeasure)) < .2:
+##                if adjust == 0:
+##                    print currentMeasure
+##                    self.circular_queue.append( currentMeasure )
+##                    self.currentAVG = self.movingAverage(self.circular_queue)
+##                elif adjust == 1:
+##                    print "adjusted, ",currentMeasure / 1.4
+##                    self.circular_queue.append( currentMeasure /1.4 )
+##                    self.currentAVG = self.movingAverage(self.circular_queue)
             
             self.LastLane = BlackLane
             self.last_time = time.time()
@@ -294,22 +320,22 @@ class TimeMarker():
             
     def checkHeight(self,H):
         if self.checkHeightOnePixel(H,L1) == True:
-            if self.checkHeightOnePixel(H+40,L1) == True:
+            if self.checkHeightOnePixel(H+29,L1) == True:
                 return [1,1]
             return [1,0]   
  
         if self.checkHeightOnePixel(H,L2) == True:
-            if self.checkHeightOnePixel(H+40,L2) == True:
+            if self.checkHeightOnePixel(H+29,L2) == True:
                 return [2,1]
             return [2,0]       
           
         if self.checkHeightOnePixel(H,L3) == True:
-            if self.checkHeightOnePixel(H+40,L2) == True:
+            if self.checkHeightOnePixel(H+29,L2) == True:
                 return [3,1]
             return [3,0]
 
         if self.checkHeightOnePixel(H,L4) == True:
-            if self.checkHeightOnePixel(H+40,L2) == True:
+            if self.checkHeightOnePixel(H+29,L2) == True:
                 return [4,1]
             return [4,0]
 
