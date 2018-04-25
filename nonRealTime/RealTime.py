@@ -247,9 +247,9 @@ class TimeMarker():
         smas = np.convolve(values,weights,'valid')
         return smas[0]
         
-    def markTime(self,BlackLane):
+    def markTime(self,BlackLane,adjust):
     ##    if timeEntryBool == True:
-        if(BlackLane != self.LastLane):
+        if(BlackLane != self.LastLane) and BlackLane != 0:
             self.t1 = time.time()
             #1.329 inches on calipers
 
@@ -261,25 +261,35 @@ class TimeMarker():
 ##                currentMeasure = .31
                 
             #lower time factor, only do this once.
-            if (self.currentAVG <= self.tier_arr[self.tier_i]):
-                print "lowering time factor to ",self.tier_i
-                self.my_lower_time = self.Lower_arr[self.tier_i]
-                self.tier_i += 1
-##            elif (self.currentAVG <= .16) and (self.second_lowered == False):
-##                print "lowering time factor to 0.65"
-##                self.my_lower_time = .70
-##                self.second_lowered = True
+##            if (self.currentAVG <= self.tier_arr[self.tier_i]):
+##                print "lowering time factor to ",self.tier_i
+##                self.my_lower_time = self.Lower_arr[self.tier_i]
+##                self.tier_i += 1
 
+
+##            if adjust == 0:
             t = threading.Thread\
-                (target = worker, args=(self.currentAVG*self.my_lower_time,BlackLane,))
+                (target = worker, args=((self.currentAVG)*self.my_lower_time,BlackLane,))
             threads.append(t)
             t.start()
-
-            if abs((self.circular_queue[-1] - currentMeasure)) < .08 and currentMeasure < self.circular_queue[-1]:
+##            elif adjust == 1:
+##                t = threading.Thread\
+##                (target = worker, args=((self.currentAVG*.833)*self.my_lower_time,BlackLane,))
+##                threads.append(t)
+##                t.start()
+            # and currentMeasure < self.circular_queue[-1]
+            # abs((self.circular_queue[-1] - currentMeasure)) < .08
+            if abs((self.circular_queue[-1] - currentMeasure)) < .2:
 ##            self.circular_queue.append( 1.0 / (self.t1 - self.last_time) )
-                print currentMeasure
-                self.circular_queue.append( currentMeasure )
-                self.currentAVG = self.movingAverage(self.circular_queue)
+##                print currentMeasure
+                if adjust == 0:
+                    print currentMeasure
+                    self.circular_queue.append( currentMeasure *.833)
+                    self.currentAVG = self.movingAverage(self.circular_queue)
+                elif adjust == 1:
+                    print "adjusted, ",currentMeasure
+                    self.circular_queue.append( currentMeasure * .833 )
+                    self.currentAVG = self.movingAverage(self.circular_queue)
             
             self.LastLane = BlackLane
             self.last_time = time.time()
@@ -291,52 +301,38 @@ class TimeMarker():
 ##        else: # there is a possibility of double/triple block
             
     def checkHeight(self,H):
-        if frame[H, L1, 0] > 150:
-            pass
-##            cv2.circle(frame,(L1,H), 5, AQUA, -1)
-        else:
-            return 1
-##            self.markTime(1)
-##            cv2.circle(frame,(L1,H), 5, RED, -1)
+        if self.checkHeightOnePixel(H,L1) == True:
+            if self.checkHeightOnePixel(H+29,L1) == True:
+                return [1,1]
+            return [1,0]   
+ 
+        if self.checkHeightOnePixel(H,L2) == True:
+            if self.checkHeightOnePixel(H+29,L2) == True:
+                return [2,1]
+            return [2,0]       
           
-        if frame[H, L2, 0] > 150:
-            pass
-##            cv2.circle(frame,(L2,H), 5, AQUA, -1)
-        else:
-            return 2
-##            self.markTime(2)
-##            cv2.circle(frame,(L2,H), 5, RED, -1)
-##            return 2
-          
-        if frame[H, L3, 0] > 150:
-            pass
-##            cv2.circle(frame,(L3,H), 5, AQUA, -1)
-        else:
-            return 3
-##            self.markTime(3)
-##            cv2.circle(frame,(L3,H), 5, RED, -1)
-##            return 3
-          
-        if frame[H, L4, 0] > 150:
-            pass
-##            cv2.circle(frame,(L4,H), 5, AQUA, -1)
-        else:
-##            self.markTime(4)
-##            cv2.circle(frame,(L4,H), 5, RED, -1)
-            return 4
+        if self.checkHeightOnePixel(H,L3) == True:
+            if self.checkHeightOnePixel(H+29,L2) == True:
+                return [3,1]
+            return [3,0]
 
-##        return 0 # no black lane found!
+        if self.checkHeightOnePixel(H,L4) == True:
+            if self.checkHeightOnePixel(H+29,L2) == True:
+                return [4,1]
+            return [4,0]
+
+        return[0,0] # no black lane found
+
+
+    # return True if black, False if empty
+    def checkHeightOnePixel(self,H,Lane):
+        if frame[H, Lane, 0] > 150:
+            return False
+        else:
+            return True
+
 
     def try_tap(self,lane,counterObj):
-##        print counterObj.get_val(), lane
-##        print lane
-##        if(lane == 1):
-##            counterObj.set_val(1)
-##            a = threading.Thread\
-##            (target = doubleTapWorker, args=(self.currentAVG,lane,counterObj,))
-##            a.start()
-##            return
-##            print " lane is 1"
         
         if( counterObj.value == 0):# if not already currently double tapping lane #
 ##            print lane
@@ -373,13 +369,6 @@ L4 = PianoCalibration['L4']
 
 threads = []
 
-##t1 = threading.Thread(target = worker, args=(self.currentAVG,black_lane_hm,))
-##                threads.append(t)
-
-# Create a VideoCapture object and read from input file
-# If the input is the camera, pass 0 instead of the video file name
-##cap = cv2.VideoCapture('my_video.h264')
-
 timer = TimeMarker()
 
 counter1 = Counter()
@@ -393,9 +382,6 @@ triplecounter2 = Counter()
 triplecounter3 = Counter()
 triplecounter4 = Counter()
  
-# Check if camera opened successfully
-##if (cap.isOpened()== False):
-##    print("Error opening video stream or file")
 
 ###################### camera setup
 camera = PiCamera()
@@ -411,12 +397,8 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
 
     frame = img.array
 
-    black_lane_h2 = timer.checkHeight(H2) #int (1,2,3 or 4) storing black lane number
-    black_lane_h3 = timer.checkHeight(H3)
-##    black_lane_hm = timer.checkHeight(HighMid)
-
-##    timer.try_tap(black_lane_hm,counter1)
-##    timer.try_tap(black_lane_h2,counter2)
+    black_lane_h2 = timer.checkHeight(H2)[0] #int (1,2,3 or 4) storing black lane number
+    black_lane_h3 = timer.checkHeight(H3)[0]
     
     if(black_lane_h2 == 1): timer.simple_tap(black_lane_h2,0)
     elif(black_lane_h2 == 2): timer.simple_tap(black_lane_h2,0)
@@ -447,18 +429,19 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
 ##sys.exit() #for now add a "breakpoint" here
     
 
-  
 for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 ##    print "currentAVG is :",timer.currentAVG
     frame = img.array
 
-    black_lane_hm = timer.checkHeight(HighMid) #int (1,2,3 or 4) storing black lane number
+    my_list = timer.checkHeight(HighMid)
+    black_lane_hm = my_list[0] #int (1,2,3 or 4) storing black lane number
+    hm_adjust = my_list[1]
 
-    if( timer.markTime( black_lane_hm ) == False ):
+    if( timer.markTime( black_lane_hm, hm_adjust ) == False ):
     #double or triple possibility, check h3 AND HighMid
 
         # move H3 down 10 pixels and check it
-        black_lane_h3 = timer.checkHeight(H3 + 6)
+        black_lane_h3 = timer.checkHeight(H3 + 6)[0]
                 
         if( black_lane_h3 == black_lane_hm ):
 ##            print "at least double detected"
@@ -468,7 +451,7 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
             elif(black_lane_h3 == 3): timer.try_tap(black_lane_hm,counter3)
             elif(black_lane_h3 == 4): timer.try_tap(black_lane_hm,counter4)
 
-            black_lane_h2 = timer.checkHeight(H2 + 6)
+            black_lane_h2 = timer.checkHeight(H2 + 6)[0]
 
             if( (black_lane_h2 == black_lane_hm) and (black_lane_h2 == black_lane_h3) ):
 ##                print "triple in lane ",black_lane_h2
@@ -487,7 +470,7 @@ for img in camera.capture_continuous(rawCapture, format="bgr", use_video_port=Tr
 ##    cv2.line(frame,(0,H1),(240,H1),VIOLET,1)
             
 
-##    cv2.imshow('Frame',frame)
+    cv2.imshow('Frame',frame)
 
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
