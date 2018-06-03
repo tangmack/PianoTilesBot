@@ -172,6 +172,9 @@ class TimeMarker():
         
         self.my_lower_time = 0.85
 
+        self.sec_per_sec = .006 # tile acceleration factor in seconds per second
+        self.time_of_start = time.time()
+
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
         smas = np.convolve(values,weights,'valid')
@@ -188,8 +191,12 @@ class TimeMarker():
                 self.my_lower_time = self.Lower_arr[self.tier_i]
                 self.tier_i += 1
 
+##            t = threading.Thread\
+##                (target = worker, args=(self.currentAVG*self.my_lower_time,BlackLane,))
+##            t = threading.Thread\
+##                (target = worker, args=(0.3,BlackLane,))
             t = threading.Thread\
-                (target = worker, args=(self.currentAVG*self.my_lower_time,BlackLane,))
+                (target = worker, args=(0.32 - (time.time() - self.time_of_start) * self.sec_per_sec,BlackLane,))
             threads.append(t)
             t.start()
 
@@ -234,8 +241,12 @@ class TimeMarker():
         
         if( counterObj.value == 0):# if not already currently double tapping lane #
             counterObj.set_val(1)
+##            a = threading.Thread\
+##            (target = doubleTapWorker, args=(self.currentAVG*self.my_lower_time,lane,counterObj,))
+##            a = threading.Thread\
+##            (target = doubleTapWorker, args=(0.3,lane,counterObj,))
             a = threading.Thread\
-            (target = doubleTapWorker, args=(self.currentAVG*self.my_lower_time,lane,counterObj,))
+            (target = doubleTapWorker, args=(0.32 - (time.time() - self.time_of_start) * self.sec_per_sec,lane,counterObj,))
             a.start()
         else:
             pass
