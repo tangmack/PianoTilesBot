@@ -162,16 +162,17 @@ class TimeMarker():
         self.LastLane = 0
 
         self.sec_per_sec = .004 # tile acceleration factor in seconds per second
+        self.sec_per_sec_arr = [.002,.0035]
 
         self.time_of_start = time.time()
 
         self.i_stage = 0
         
         #border time between stage (index) and stage (index+1)
-        self.time_array = [52,63,66,76,83,87,600] #[[6.45,7.15,7.66
+        self.time_array = [52,630,66,76,83,87,600] #[[6.45,7.15,7.66
 
         self.A = 0.29 # stage 0
-        self.A_array = [0.33,0.35,.37,.39,.41,.43] # [stage 1,stage 2,...]
+        self.A_array = [.122,0.35,.37,.39,.41,.43] # [stage 1,stage 2,...]
 
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
@@ -185,7 +186,9 @@ class TimeMarker():
 
             if time_elap > self.time_array[self.i_stage]:
                 self.A = self.A_array[self.i_stage]
+                self.sec_per_sec = self.sec_per_sec_arr[self.i_stage]
                 self.i_stage += 1
+                self.time_of_start = time.time()
                 print "now in stage ",self.i_stage, "at time ",time_elap
 
             #TODO possibly: make time_elap used in code below
@@ -235,10 +238,12 @@ class TimeMarker():
 ##            (target = doubleTapWorker, args=(0.3,lane,counterObj,))
             time_elapsed = time.time() - self.time_of_start
             
-            if time_elapsed > self.time_array[self.i_stage]:
-                self.A = self.A_array[self.i_stage]
-                self.i_stage += 1
-                print "double or triple triggered now in stage ",self.i_stage,"at time ",time_elapsed
+##            if time_elapsed > self.time_array[self.i_stage]:
+##                self.A = self.A_array[self.i_stage]
+##                self.sec_per_sec = self.sec_per_sec_arr[self.i_stage]
+##                self.i_stage += 1
+##                self.time_of_start = time.time()
+##                print "double or triple triggered now in stage ",self.i_stage,"at time ",time_elapsed
                 
             a = threading.Thread\
             (target = doubleTapWorker, args=(self.A - (time_elapsed) * self.sec_per_sec,lane,counterObj,))
