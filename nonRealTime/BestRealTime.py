@@ -71,7 +71,7 @@ def worker_simple(num,Lane):
     time.sleep(num)#do not multiply by lower time factor
 
     if Lane == 1:
-        print "tap lane 1"
+##        print "tap lane 1"
         GPIO.output(LedPin, GPIO.HIGH)  
         time.sleep(delay_time_down)
 
@@ -79,14 +79,14 @@ def worker_simple(num,Lane):
         time.sleep(delay_time_release)
 
     elif Lane == 2:
-        print "tap lane 2"
+##        print "tap lane 2"
         GPIO.output(LedPin2, GPIO.HIGH)  
         time.sleep(delay_time_down)
 
         GPIO.output(LedPin2, GPIO.LOW)  
         time.sleep(delay_time_release)
     elif Lane == 3:
-        print "tap lane 3"
+##        print "tap lane 3"
         GPIO.output(LedPin3, GPIO.HIGH)  
         time.sleep(delay_time_down)
 
@@ -94,7 +94,7 @@ def worker_simple(num,Lane):
         time.sleep(delay_time_release)
         
     elif Lane == 4:
-        print "tap lane 4"
+##        print "tap lane 4"
         GPIO.output(LedPin4, GPIO.HIGH)  
         time.sleep(delay_time_down)
 
@@ -161,17 +161,6 @@ class TimeMarker():
 
         self.LastLane = 0
 
-        self.circular_queue = deque([0.3,0.3,0.3,0.3,0.3,0.3,0.3], maxlen=AVG_SIZE)
-
-        self.currentAVG = 0.3
-
-        # need to put a "fake" .01 case at the end to prevent index out of bounds
-        self.tier_arr = np.array([.17,.13,.11,.08,0])
-        self.Lower_arr = np.array([0.80,.70,.65,.60,.60])
-        self.tier_i = 0
-        
-        self.my_lower_time = 0.85
-
         self.sec_per_sec = .004 # tile acceleration factor in seconds per second
 
         self.time_of_start = time.time()
@@ -179,10 +168,10 @@ class TimeMarker():
         self.i_stage = 0
         
         #border time between stage (index) and stage (index+1)
-        self.time_array = [46,80,600]
+        self.time_array = [52,63,71,600] #[[6.45,7.15,7.66
 
         self.A = 0.29 # stage 0
-        self.A_array = [0.33,0.33] # [stage 1,stage 2,...]
+        self.A_array = [0.33,0.35,.37] # [stage 1,stage 2,...]
 
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
@@ -191,20 +180,7 @@ class TimeMarker():
         
     def markTime(self,BlackLane):
         if(BlackLane != self.LastLane):
-            self.t1 = time.time()
-            currentMeasure = (self.t1 - self.last_time)
-        
-            #lower time factor, only do this once.
-            if (self.currentAVG <= self.tier_arr[self.tier_i]):
-                print "lowering time factor to ",self.tier_i
-                self.my_lower_time = self.Lower_arr[self.tier_i]
-                self.tier_i += 1
 
-
-##            t = threading.Thread\
-##                (target = worker, args=(self.currentAVG*self.my_lower_time,BlackLane,))
-##            t = threading.Thread\
-##                (target = worker, args=(0.3,BlackLane,))
             time_elap = time.time() - self.time_of_start
 
             if time_elap > self.time_array[self.i_stage]:
@@ -218,34 +194,8 @@ class TimeMarker():
             threads.append(t)
             t.start()
             
-
-                
-
-##            if not (self.in_stage2):
-##                if (time_elap > self.stage_two):
-##                    print "###########################STAGE TWO"
-##                    self.in_stage2 = True
-##            
-##            if(time_elap > self.stage_two):
-##                t = threading.Thread\
-##                    (target = worker, args=(0.33 - (time.time() - self.time_of_start) * self.sec_per_sec2,BlackLane,))
-##                threads.append(t)
-##                t.start()
-##            else:
-##                
-##                t = threading.Thread\
-##                    (target = worker, args=(0.29 - (time.time() - self.time_of_start) * self.sec_per_sec,BlackLane,))
-##                threads.append(t)
-##                t.start()
-
-            if abs((self.circular_queue[-1] - currentMeasure)) < .08 and currentMeasure < self.circular_queue[-1]:
-                print currentMeasure
-                self.circular_queue.append( currentMeasure )
-                self.currentAVG = self.movingAverage(self.circular_queue)
-            
             self.LastLane = BlackLane
-            self.last_time = time.time()
-
+            
             return True
         else:
             return False
