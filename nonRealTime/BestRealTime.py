@@ -173,6 +173,10 @@ class TimeMarker():
         self.my_lower_time = 0.85
 
         self.sec_per_sec = .004 # tile acceleration factor in seconds per second
+
+        self.sec_per_sec2 = .004
+
+        
         self.time_of_start = time.time()
 
 ##        self.constant_stage1 = 0.29
@@ -211,7 +215,7 @@ class TimeMarker():
             
             if(time_elap > self.stage_two):
                 t = threading.Thread\
-                    (target = worker, args=(0.32 - (time.time() - self.time_of_start) * self.sec_per_sec,BlackLane,))
+                    (target = worker, args=(0.33 - (time.time() - self.time_of_start) * self.sec_per_sec2,BlackLane,))
                 threads.append(t)
                 t.start()
             else:
@@ -269,7 +273,7 @@ class TimeMarker():
             time_elapsed = time.time() - self.time_of_start
             if (time_elapsed > self.stage_two):
                 a = threading.Thread\
-                (target = doubleTapWorker, args=(0.32 - (time_elapsed) * self.sec_per_sec,lane,counterObj,))
+                (target = doubleTapWorker, args=(0.33 - (time_elapsed) * self.sec_per_sec2,lane,counterObj,))
                 a.start()
             else:
                 a = threading.Thread\
