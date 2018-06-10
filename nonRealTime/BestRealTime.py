@@ -174,16 +174,15 @@ class TimeMarker():
 
         self.sec_per_sec = .004 # tile acceleration factor in seconds per second
 
-        self.sec_per_sec2 = .004
-
-        
         self.time_of_start = time.time()
 
-##        self.constant_stage1 = 0.29
+        self.i_stage = 0
+        
+        #border time between stage (index) and stage (index+1)
+        self.time_array = [46,80,600]
 
-        self.stage_two = 46 #time in seconds for second phase of gameplay style
-
-        self.in_stage2 = False #status, Flase is not in stage 2, True is in stage 2
+        self.A = 0.29 # stage 0
+        self.A_array = [0.33,0.33] # [stage 1,stage 2,...]
 
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
@@ -208,22 +207,36 @@ class TimeMarker():
 ##                (target = worker, args=(0.3,BlackLane,))
             time_elap = time.time() - self.time_of_start
 
-            if not (self.in_stage2):
-                if (time_elap > self.stage_two):
-                    print "###########################STAGE TWO"
-                    self.in_stage2 = True
+            if time_elap > self.time_array[self.i_stage]:
+                self.A = self.A_array[self.i_stage]
+                self.i_stage += 1
+                print "now in stage ",self.i_stage, "at time ",time_elap
+
+            #TODO possibly: make time_elap used in code below
+            t = threading.Thread\
+                (target = worker, args=(self.A - (time.time() - self.time_of_start) * self.sec_per_sec,BlackLane,))
+            threads.append(t)
+            t.start()
             
-            if(time_elap > self.stage_two):
-                t = threading.Thread\
-                    (target = worker, args=(0.33 - (time.time() - self.time_of_start) * self.sec_per_sec2,BlackLane,))
-                threads.append(t)
-                t.start()
-            else:
+
                 
-                t = threading.Thread\
-                    (target = worker, args=(0.29 - (time.time() - self.time_of_start) * self.sec_per_sec,BlackLane,))
-                threads.append(t)
-                t.start()
+
+##            if not (self.in_stage2):
+##                if (time_elap > self.stage_two):
+##                    print "###########################STAGE TWO"
+##                    self.in_stage2 = True
+##            
+##            if(time_elap > self.stage_two):
+##                t = threading.Thread\
+##                    (target = worker, args=(0.33 - (time.time() - self.time_of_start) * self.sec_per_sec2,BlackLane,))
+##                threads.append(t)
+##                t.start()
+##            else:
+##                
+##                t = threading.Thread\
+##                    (target = worker, args=(0.29 - (time.time() - self.time_of_start) * self.sec_per_sec,BlackLane,))
+##                threads.append(t)
+##                t.start()
 
             if abs((self.circular_queue[-1] - currentMeasure)) < .08 and currentMeasure < self.circular_queue[-1]:
                 print currentMeasure
@@ -271,14 +284,16 @@ class TimeMarker():
 ##            a = threading.Thread\
 ##            (target = doubleTapWorker, args=(0.3,lane,counterObj,))
             time_elapsed = time.time() - self.time_of_start
-            if (time_elapsed > self.stage_two):
-                a = threading.Thread\
-                (target = doubleTapWorker, args=(0.33 - (time_elapsed) * self.sec_per_sec2,lane,counterObj,))
-                a.start()
-            else:
-                a = threading.Thread\
-                (target = doubleTapWorker, args=(0.29 - (time_elapsed) * self.sec_per_sec,lane,counterObj,))
-                a.start()
+            
+            if time_elapsed > self.time_array[self.i_stage]:
+                self.A = self.A_array[self.i_stage]
+                self.i_stage += 1
+                print "double or triple triggered now in stage ",self.i_stage,"at time ",time_elapsed
+                
+            a = threading.Thread\
+            (target = doubleTapWorker, args=(self.A - (time_elapsed) * self.sec_per_sec,lane,counterObj,))
+            a.start()
+
         else:
             pass
 
