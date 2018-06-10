@@ -168,10 +168,10 @@ class TimeMarker():
         self.i_stage = 0
         
         #border time between stage (index) and stage (index+1)
-        self.time_array = [52,63,71,600] #[[6.45,7.15,7.66
+        self.time_array = [52,63,71,76,600] #[[6.45,7.15,7.66
 
         self.A = 0.29 # stage 0
-        self.A_array = [0.33,0.35,.37] # [stage 1,stage 2,...]
+        self.A_array = [0.33,0.35,.37,.39] # [stage 1,stage 2,...]
 
     def movingAverage(self,values):
         weights = np.repeat(1.0,AVG_SIZE)/AVG_SIZE
@@ -186,7 +186,7 @@ class TimeMarker():
             if time_elap > self.time_array[self.i_stage]:
                 self.A = self.A_array[self.i_stage]
                 self.i_stage += 1
-                print "now in stage ",self.i_stage, "at time ",time_elap
+##                print "now in stage ",self.i_stage, "at time ",time_elap
 
             #TODO possibly: make time_elap used in code below
             t = threading.Thread\
@@ -238,7 +238,7 @@ class TimeMarker():
             if time_elapsed > self.time_array[self.i_stage]:
                 self.A = self.A_array[self.i_stage]
                 self.i_stage += 1
-                print "double or triple triggered now in stage ",self.i_stage,"at time ",time_elapsed
+##                print "double or triple triggered now in stage ",self.i_stage,"at time ",time_elapsed
                 
             a = threading.Thread\
             (target = doubleTapWorker, args=(self.A - (time_elapsed) * self.sec_per_sec,lane,counterObj,))
